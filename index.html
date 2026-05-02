@@ -335,6 +335,11 @@
     gap: 10px;
     margin-top: 20px;
   }
+  .ride-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
   .btn-primary {
     flex: 1;
     padding: 13px;
@@ -362,6 +367,176 @@
     transition: opacity 0.15s;
   }
   .btn-secondary:active { opacity: 0.7; }
+  .btn-ride {
+    flex: 1;
+    padding: 11px 10px;
+    border-radius: 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px; font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s, transform 0.12s;
+    letter-spacing: 0.01em;
+  }
+  .btn-ride:active { opacity: 0.85; transform: scale(0.97); }
+  .btn-uber {
+    background: #000;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.1);
+  }
+  .btn-indrive {
+    background: #1DB954;
+    color: #000;
+  }
+  .btn-ride-logo {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin: 20px 0 10px;
+  }
+
+  /* GOOGLE MY BUSINESS BUTTON */
+  .btn-gmb {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+    transition: opacity 0.15s, background 0.15s;
+    margin-bottom: 4px;
+    text-decoration: none;
+  }
+  .btn-gmb:active { opacity: 0.75; }
+  .gmb-logo {
+    display: flex; gap: 2px; align-items: center; flex-shrink: 0;
+  }
+  .gmb-logo span {
+    width: 7px; height: 7px; border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* REVIEWS */
+  .reviews-section { margin-top: 4px; }
+
+  .review-write {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .review-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--btn);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .review-input-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .star-picker {
+    display: flex;
+    gap: 4px;
+  }
+  .star-picker span {
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.1s, transform 0.1s;
+    user-select: none;
+  }
+  .star-picker span.lit { opacity: 1; }
+  .star-picker span:active { transform: scale(1.3); }
+
+  .review-textarea {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    min-height: 72px;
+    transition: border-color 0.15s;
+  }
+  .review-textarea:focus { border-color: var(--btn); }
+  .review-textarea::placeholder { color: var(--hint); }
+
+  .btn-submit-review {
+    align-self: flex-end;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--btn);
+    color: var(--btn-txt);
+    font-family: 'Sora', sans-serif;
+    font-size: 12px; font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-submit-review:active { opacity: 0.8; }
+  .btn-submit-review:disabled { opacity: 0.4; cursor: default; }
+
+  .reviews-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .review-item {
+    background: var(--bg2);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .review-avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .review-author { font-size: 12px; font-weight: 600; flex: 1; }
+  .review-date { font-size: 10px; color: var(--hint); }
+  .review-stars { font-size: 12px; margin-bottom: 4px; }
+  .review-text { font-size: 12px; color: var(--hint); line-height: 1.5; }
+
+  .no-reviews {
+    text-align: center;
+    color: var(--hint);
+    font-size: 12px;
+    padding: 16px 0 8px;
+  }
 
   /* TOAST */
   #toast {
@@ -488,6 +663,59 @@
         </svg>
       </button>
     </div>
+    <div class="ride-row">
+      <button class="btn-ride btn-uber" id="uberBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+        </svg>
+        Uber
+      </button>
+      <button class="btn-ride btn-indrive" id="indriveBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="black">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+        </svg>
+        inDrive
+      </button>
+    </div>
+
+    <!-- Google My Business -->
+    <div id="gmbSection" style="display:none">
+      <div class="section-label">Google Business Profile</div>
+      <a class="btn-gmb" id="gmbBtn" href="#" target="_blank">
+        <div class="gmb-logo">
+          <span style="background:#4285F4"></span>
+          <span style="background:#EA4335"></span>
+          <span style="background:#FBBC05"></span>
+          <span style="background:#34A853"></span>
+        </div>
+        View on Google Maps
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;opacity:0.4">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Reviews -->
+    <div class="section-label">Reviews</div>
+    <div class="reviews-section">
+      <div class="review-write">
+        <div class="review-avatar" id="reviewAvatar">?</div>
+        <div class="review-input-wrap">
+          <div class="star-picker" id="starPicker">
+            <span data-v="1">★</span>
+            <span data-v="2">★</span>
+            <span data-v="3">★</span>
+            <span data-v="4">★</span>
+            <span data-v="5">★</span>
+          </div>
+          <textarea class="review-textarea" id="reviewText" placeholder="Share your experience…" rows="3"></textarea>
+          <button class="btn-submit-review" id="submitReview">Post</button>
+        </div>
+      </div>
+      <div class="reviews-list" id="reviewsList"></div>
+    </div>
+
   </div>
 </div>
 
@@ -507,22 +735,27 @@ const ZONES = [
 const LOCATIONS = [
   { id:1, name:"Maktabah Nūr al-Islām", category:"Book Store", emoji:"📚",
     address:"Al Hay Al Asher, Nasr City, Cairo",
-    google:"Maktabah Nūr al-Islām (Maktabah 'Alī)", zone:"Hayy 10", lat:30.063, lng:31.370 },
+    google:"Maktabah Nūr al-Islām (Maktabah 'Alī)", gmaps:"https://maps.app.goo.gl/jydfR3D8G713Lqek6",
+    zone:"Hayy 10", lat:30.063, lng:31.370 },
   { id:2, name:"Markaz Furqan", category:"Marakiz", emoji:"🕌",
     address:"Nasr City, Cairo",
-    google:null, zone:"Hayy 8", lat:30.053840, lng:31.359129 },
+    google:null, gmaps:null, zone:"Hayy 8", lat:30.053840, lng:31.359129 },
   { id:3, name:"Markaz Al Ibaanah", category:"Marakiz", emoji:"🕌",
     address:"Saqaliya St, Makram Ebeid, Nasr City",
-    google:"Al Ibaanah Arabic Center", zone:"Makram", lat:30.058, lng:31.345 },
+    google:"Al Ibaanah Arabic Center", gmaps:"https://maps.app.goo.gl/qCvptZWaijvQhYqp7",
+    zone:"Makram", lat:30.058, lng:31.345 },
   { id:4, name:"Sport Life Academy (BJJ)", category:"Sports", emoji:"🥋",
     address:"Nasr City, Cairo",
-    google:null, zone:"Hayy 7", lat:30.041906, lng:31.331652 },
+    google:null, gmaps:"https://maps.app.goo.gl/6XbzLuQAeLrSntFA7",
+    zone:"Hayy 7", lat:30.041906, lng:31.331652 },
   { id:5, name:"Markaz Fajr", category:"Marakiz", emoji:"🕌",
     address:"Al Farouq Omar St, At Taseah, Nasr City",
-    google:"Fajr Center for Arabic Language", zone:"Hayy 9", lat:30.052, lng:31.368 },
+    google:"Fajr Center for Arabic Language", gmaps:"https://maps.app.goo.gl/BjZ1BHvP94n1WpPr6",
+    zone:"Hayy 9", lat:30.052, lng:31.368 },
   { id:6, name:"Markaz Lisan al Arab", category:"Marakiz", emoji:"📖",
     address:"75 Mahdy Arafa, At Taseah, Nasr City",
-    google:"لسان العرب لرجال", zone:"Hayy 9", lat:30.050, lng:31.366 },
+    google:"لسان العرب لرجال", gmaps:"https://maps.app.goo.gl/9BCa4s6mqcH5kc9A6",
+    zone:"Hayy 9", lat:30.050, lng:31.366 },
 ];
 
 const CAT_COLORS = {
@@ -731,18 +964,64 @@ function openDetail(loc) {
   badge.textContent = loc.category;
   badge.style.cssText = `background:${color}22;color:${color}`;
 
-  const googleRow = document.getElementById('detailGoogleRow');
-  const googleTxt = document.getElementById('detailGoogle');
-  if (loc.google) {
-    googleRow.style.display = 'flex';
-    googleTxt.textContent = 'Also known as: ' + loc.google;
+  // Also known as row (hide — replaced by GMB button)
+  document.getElementById('detailGoogleRow').style.display = 'none';
+
+  // Google My Business
+  const gmbSection = document.getElementById('gmbSection');
+  const gmbBtn = document.getElementById('gmbBtn');
+  if (loc.gmaps) {
+    gmbSection.style.display = 'block';
+    gmbBtn.href = loc.gmaps;
+    gmbBtn.onclick = (e) => {
+      e.preventDefault();
+      tg ? tg.openLink(loc.gmaps) : window.open(loc.gmaps, '_blank');
+      tg?.HapticFeedback.impactOccurred('light');
+    };
   } else {
-    googleRow.style.display = 'none';
+    gmbSection.style.display = 'none';
   }
+
+  // Reviews
+  renderReviews(loc.id);
+  currentLocId = loc.id;
+
+  // Star picker reset
+  selectedStars = 0;
+  updateStarUI(0);
+  document.getElementById('reviewText').value = '';
+
+  // Avatar initials from Telegram user
+  const userName = tg?.initDataUnsafe?.user?.first_name || 'You';
+  document.getElementById('reviewAvatar').textContent = userName.charAt(0).toUpperCase();
 
   document.getElementById('directionsBtn').onclick = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
     tg ? tg.openLink(url) : window.open(url, '_blank');
+  };
+
+  document.getElementById('uberBtn').onclick = () => {
+    // Uber deep link: tries app first, falls back to web
+    const appUrl = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${loc.lat}&dropoff[longitude]=${loc.lng}&dropoff[nickname]=${encodeURIComponent(loc.name)}`;
+    const webUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${loc.lat}&dropoff[longitude]=${loc.lng}&dropoff[nickname]=${encodeURIComponent(loc.name)}`;
+    tg ? tg.openLink(webUrl) : window.open(appUrl, '_blank');
+    tg?.HapticFeedback.impactOccurred('light');
+  };
+
+  document.getElementById('indriveBtn').onclick = () => {
+    // InDrive deep link
+    const webUrl = `https://indrive.com/ride?lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}`;
+    const appUrl = `indrive://ride?lat=${loc.lat}&lng=${loc.lng}&name=${encodeURIComponent(loc.name)}`;
+    // Try app link first on mobile, fallback to web
+    if (tg) {
+      tg.openLink(webUrl);
+    } else {
+      const a = document.createElement('a');
+      a.href = appUrl;
+      a.click();
+      setTimeout(() => window.open(webUrl, '_blank'), 1500);
+    }
+    tg?.HapticFeedback.impactOccurred('light');
   };
 
   document.getElementById('shareBtn').onclick = () => {
@@ -942,6 +1221,88 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   map?.panTo({ lat: 30.052, lng: 31.360 });
   map?.setZoom(13);
   tg?.HapticFeedback.impactOccurred('light');
+});
+
+// ── REVIEWS ───────────────────────────────────────────────────────────────────
+let selectedStars = 0;
+let currentLocId = null;
+
+// Simple in-memory + sessionStorage reviews store
+function getReviews(locId) {
+  try {
+    const stored = sessionStorage.getItem('reviews_' + locId);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+}
+
+function saveReview(locId, review) {
+  try {
+    const reviews = getReviews(locId);
+    reviews.unshift(review);
+    sessionStorage.setItem('reviews_' + locId, JSON.stringify(reviews));
+  } catch {}
+}
+
+const AVATAR_COLORS = ['#4f7cff','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22'];
+
+function renderReviews(locId) {
+  const reviews = getReviews(locId);
+  const list = document.getElementById('reviewsList');
+  if (!reviews.length) {
+    list.innerHTML = '<div class="no-reviews">No reviews yet — be the first! 👆</div>';
+    return;
+  }
+  list.innerHTML = reviews.map((r, i) => {
+    const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    const stars = '★'.repeat(r.stars) + '☆'.repeat(5 - r.stars);
+    return `<div class="review-item">
+      <div class="review-header">
+        <div class="review-avatar-sm" style="background:${color}">${r.author.charAt(0).toUpperCase()}</div>
+        <div class="review-author">${r.author}</div>
+        <div class="review-date">${r.date}</div>
+      </div>
+      <div class="review-stars" style="color:#f1c40f">${stars}</div>
+      ${r.text ? `<div class="review-text">${r.text}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function updateStarUI(val) {
+  document.querySelectorAll('#starPicker span').forEach(s => {
+    s.classList.toggle('lit', parseInt(s.dataset.v) <= val);
+  });
+}
+
+// Star picker interactions
+document.getElementById('starPicker').addEventListener('click', (e) => {
+  const star = e.target.closest('[data-v]');
+  if (!star) return;
+  selectedStars = parseInt(star.dataset.v);
+  updateStarUI(selectedStars);
+  tg?.HapticFeedback.selectionChanged();
+});
+
+document.getElementById('submitReview').addEventListener('click', () => {
+  const text = document.getElementById('reviewText').value.trim();
+  if (!selectedStars) { showToast('Please pick a star rating first'); return; }
+  if (!currentLocId) return;
+
+  const userName = tg?.initDataUnsafe?.user?.first_name
+    || tg?.initDataUnsafe?.user?.username
+    || 'Anonymous';
+
+  const now = new Date();
+  const date = now.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+  saveReview(currentLocId, { author: userName, stars: selectedStars, text, date });
+  renderReviews(currentLocId);
+
+  // Reset
+  selectedStars = 0;
+  updateStarUI(0);
+  document.getElementById('reviewText').value = '';
+  tg?.HapticFeedback.notificationOccurred('success');
+  showToast('Review posted! ⭐');
 });
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────
