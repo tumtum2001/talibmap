@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Student Map</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      var(--tg-theme-bg-color,            #0f1117);
+    --bg2:     var(--tg-theme-secondary-bg-color,  #1a1d27);
+    --text:    var(--tg-theme-text-color,           #f0f0f0);
+    --hint:    var(--tg-theme-hint-color,           #6b7280);
+    --btn:     var(--tg-theme-button-color,         #4f7cff);
+    --btn-txt: var(--tg-theme-button-text-color,    #ffffff);
+
+    --cat-marakiz:   #4A90D9;
+    --cat-bookstore: #9B72CF;
+    --cat-sports:    #3CB371;
+
+    --r: 16px;
+    --pill: 999px;
+    --sheet: 300px;
+    --ease: cubic-bezier(0.34,1.2,0.64,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #map { position: absolute; inset: 0; z-index: 0; }
+
+  /* TOP BAR */
+  #topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 10px 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border-radius: var(--pill);
+    padding: 10px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.07);
+    pointer-events: all;
+  }
+  .search-wrap svg { flex-shrink: 0; color: var(--hint); }
+  .search-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .search-wrap input::placeholder { color: var(--hint); }
+
+  /* CHIPS */
+  #chips {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    pointer-events: all;
+    padding-bottom: 2px;
+  }
+  #chips::-webkit-scrollbar { display: none; }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 13px;
+    border-radius: var(--pill);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    background: var(--bg);
+    color: var(--hint);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+    user-select: none;
+  }
+  .chip-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--c);
+    opacity: 0.5;
+    transition: opacity 0.18s;
+  }
+  .chip.on { color: #fff; border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, var(--bg)); }
+  .chip.on .chip-dot { opacity: 1; }
+
+  /* FAB */
+  #fab {
+    position: absolute;
+    right: 14px;
+    bottom: calc(var(--sheet) + 14px);
+    z-index: 10;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+    color: var(--hint);
+  }
+  #fab:active { transform: scale(0.9); }
+
+  /* BOTTOM SHEET */
+  #sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 20;
+    height: var(--sheet);
+    background: var(--bg);
+    border-radius: var(--r) var(--r) 0 0;
+    box-shadow: 0 -6px 30px rgba(0,0,0,0.35);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: height 0.32s var(--ease);
+  }
+  #sheet.tall { height: 70dvh; }
+
+  .handle-row {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 4px;
+    cursor: ns-resize;
+    flex-shrink: 0;
+  }
+  .handle-bar {
+    width: 36px; height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+  }
+
+  .sheet-title-row {
+    padding: 4px 16px 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .sheet-title { font-size: 15px; font-weight: 700; }
+  .sheet-count { font-size: 12px; color: var(--hint); font-weight: 500; }
+
+  /* LIST */
+  #list {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
+  }
+
+  .loc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.12s;
+  }
+  .loc-item:active { background: rgba(255,255,255,0.04); }
+
+  .loc-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .loc-body { flex: 1; min-width: 0; }
+  .loc-name {
+    font-size: 13px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .loc-meta {
+    font-size: 11px; color: var(--hint);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .loc-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--pill);
+    flex-shrink: 0;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .loc-arrow { color: var(--hint); flex-shrink: 0; opacity: 0.5; }
+
+  /* EMPTY */
+  #empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 20px;
+    color: var(--hint);
+    text-align: center;
+  }
+  #empty.show { display: flex; }
+  #empty .e-icon { font-size: 36px; margin-bottom: 4px; }
+  #empty .e-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  #empty .e-sub { font-size: 12px; }
+
+  /* DETAIL PANEL */
+  #detail {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    background: var(--bg);
+    transform: translateY(100%);
+    transition: transform 0.3s var(--ease);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #detail.open { transform: translateY(0); }
+
+  #detail-map-wrap {
+    height: 200px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #detail-map { width: 100%; height: 100%; }
+
+  .detail-back {
+    position: absolute;
+    top: 12px; left: 12px;
+    z-index: 5;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 32px;
+  }
+
+  .detail-cat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .detail-cat-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--pill);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .detail-zone { font-size: 11px; color: var(--hint); }
+
+  .detail-name {
+    font-size: 20px; font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .detail-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .detail-row svg { flex-shrink: 0; color: var(--hint); margin-top: 1px; }
+  .detail-row-text { font-size: 13px; color: var(--hint); line-height: 1.5; }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 13px;
+    border-radius: 12px;
+    background: var(--btn);
+    color: var(--btn-txt);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px; font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    gap: 7px;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:active { opacity: 0.8; }
+  .btn-secondary {
+    width: 48px;
+    padding: 13px;
+    border-radius: 12px;
+    background: var(--bg2);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s;
+  }
+  .btn-secondary:active { opacity: 0.7; }
+
+  /* TOAST */
+  #toast {
+    position: absolute;
+    bottom: calc(var(--sheet) + 20px);
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: rgba(30,32,44,0.95);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 12px; font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--pill);
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="topbar">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input id="searchInput" type="text" placeholder="Search locations…" autocomplete="off">
+    <svg id="clearBtn" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+      style="cursor:pointer;display:none;color:var(--hint)">
+      <path d="M18 6 6 18M6 6l12 12"/>
+    </svg>
+  </div>
+  <div id="chips"></div>
+</div>
+
+<div id="fab" title="Reset view">
+  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+  </svg>
+</div>
+
+<div id="sheet">
+  <div class="handle-row" id="handleRow">
+    <div class="handle-bar"></div>
+  </div>
+  <div class="sheet-title-row">
+    <span class="sheet-title">Nearby Places</span>
+    <span class="sheet-count" id="countLabel">6 locations</span>
+  </div>
+  <div id="list"></div>
+  <div id="empty">
+    <div class="e-icon">🔍</div>
+    <div class="e-title">No results found</div>
+    <div class="e-sub">Try a different search or category</div>
+  </div>
+</div>
+
+<div id="detail">
+  <div id="detail-map-wrap">
+    <div id="detail-map"></div>
+    <div class="detail-back" id="detailBack">
+      <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M19 12H5m7-7-7 7 7 7"/>
+      </svg>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-cat-row">
+      <span class="detail-cat-badge" id="detailBadge"></span>
+      <span class="detail-zone" id="detailZone"></span>
+    </div>
+    <div class="detail-name" id="detailName"></div>
+    <div class="detail-row">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      <div class="detail-row-text" id="detailAddr"></div>
+    </div>
+    <div class="detail-row" id="detailGoogleRow" style="display:none">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4l3 3"/>
+      </svg>
+      <div class="detail-row-text" id="detailGoogle"></div>
+    </div>
+    <div class="action-row">
+      <button class="btn-primary" id="directionsBtn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+        Get Directions
+      </button>
+      <button class="btn-secondary" id="shareBtn" title="Share">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const ZONES = [
+  { name:'Hayy 9',  color:'#0288D1', opacity:0.15, coords:[[30.0556952,31.3575406],[30.0468172,31.3565965],[30.0491389,31.3788266],[30.0582025,31.3799639]] },
+  { name:'Hayy 8',  color:'#F9A825', opacity:0.15, coords:[[30.0557067,31.3571324],[30.053608,31.3387646],[30.0449898,31.3400521],[30.0467358,31.3561024]] },
+  { name:'Hayy 7',  color:'#E65100', opacity:0.15, coords:[[30.0434605,31.3293488],[30.0403584,31.3298424],[30.0370148,31.3328893],[30.0342098,31.3390048],[30.0350829,31.3467081],[30.0451879,31.345249]] },
+  { name:'Hayy 10', color:'#FF5252', opacity:0.15, coords:[[30.0463077,31.3565832],[30.0363143,31.3554674],[30.0381347,31.377483],[30.0486481,31.3786846]] },
+  { name:'Makram',  color:'#43A047', opacity:0.18, coords:[[30.0685174,31.3365714],[30.0542174,31.3385026],[30.0549231,31.3458412],[30.0693344,31.3439958]] },
+  { name:'Hayy 6',  color:'#9C27B0', opacity:0.18, coords:[[30.0696328,31.3488839],[30.0609789,31.3499782],[30.0617775,31.3578103],[30.0645167,31.3577459],[30.0679244,31.3568232],[30.06954,31.3557074],[30.071007,31.35442],[30.0699113,31.3519953]] },
+];
+
+const LOCATIONS = [
+  { id:1, name:"Maktabah Nūr al-Islām", category:"Book Store", emoji:"📚",
+    address:"Al Hay Al Asher, Nasr City, Cairo",
+    google:"Maktabah Nūr al-Islām (Maktabah 'Alī)", zone:"Hayy 10", lat:30.063, lng:31.370 },
+  { id:2, name:"Markaz Furqan", category:"Marakiz", emoji:"🕌",
+    address:"Nasr City, Cairo",
+    google:null, zone:"Hayy 8", lat:30.053840, lng:31.359129 },
+  { id:3, name:"Markaz Al Ibaanah", category:"Marakiz", emoji:"🕌",
+    address:"Saqaliya St, Makram Ebeid, Nasr City",
+    google:"Al Ibaanah Arabic Center", zone:"Makram", lat:30.058, lng:31.345 },
+  { id:4, name:"Sport Life Academy (BJJ)", category:"Sports", emoji:"🥋",
+    address:"Nasr City, Cairo",
+    google:null, zone:"Hayy 7", lat:30.041906, lng:31.331652 },
+  { id:5, name:"Markaz Fajr", category:"Marakiz", emoji:"🕌",
+    address:"Al Farouq Omar St, At Taseah, Nasr City",
+    google:"Fajr Center for Arabic Language", zone:"Hayy 9", lat:30.052, lng:31.368 },
+  { id:6, name:"Markaz Lisan al Arab", category:"Marakiz", emoji:"📖",
+    address:"75 Mahdy Arafa, At Taseah, Nasr City",
+    google:"لسان العرب لرجال", zone:"Hayy 9", lat:30.050, lng:31.366 },
+];
+
+const CAT_COLORS = {
+  'Marakiz':    '#4A90D9',
+  'Book Store': '#9B72CF',
+  'Sports':     '#3CB371',
+};
+
+// ── TELEGRAM ──────────────────────────────────────────────────────────────────
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('bg_color'); tg.setBackgroundColor('bg_color'); }
+const isDark = tg ? tg.colorScheme === 'dark' : true;
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let map, detailMapInst, detailMarker;
+let activeFilters = new Set();
+let searchQuery = '';
+let markers = {};
+
+const DARK_STYLE = [
+  { elementType:'geometry', stylers:[{color:'#1a1d27'}] },
+  { elementType:'labels.text.fill', stylers:[{color:'#8a9bb0'}] },
+  { elementType:'labels.text.stroke', stylers:[{color:'#1a1d27'}] },
+  { featureType:'road', elementType:'geometry', stylers:[{color:'#252840'}] },
+  { featureType:'road', elementType:'geometry.stroke', stylers:[{color:'#1a1d27'}] },
+  { featureType:'road.highway', elementType:'geometry', stylers:[{color:'#2c3050'}] },
+  { featureType:'water', elementType:'geometry', stylers:[{color:'#0f1117'}] },
+  { featureType:'poi', elementType:'geometry', stylers:[{color:'#1e2130'}] },
+  { featureType:'poi', elementType:'labels.text.fill', stylers:[{color:'#6b7280'}] },
+  { featureType:'poi.park', elementType:'geometry', stylers:[{color:'#1a2515'}] },
+  { featureType:'transit', elementType:'geometry', stylers:[{color:'#1e2130'}] },
+  { featureType:'administrative', elementType:'geometry.stroke', stylers:[{color:'#2a2d40'}] },
+];
+
+// ── MAP INIT ──────────────────────────────────────────────────────────────────
+window.initMap = function () {
+  const center = { lat:30.052, lng:31.360 };
+
+  map = new google.maps.Map(document.getElementById('map'), {
+    center, zoom:13,
+    styles: isDark ? DARK_STYLE : [],
+    disableDefaultUI: true,
+    gestureHandling: 'greedy',
+    clickableIcons: false,
+  });
+
+  // Zone polygons
+  ZONES.forEach(z => {
+    new google.maps.Polygon({
+      paths: z.coords.map(([lat,lng]) => ({lat,lng})),
+      strokeColor: z.color,
+      strokeOpacity: 0.6,
+      strokeWeight: 1.5,
+      fillColor: z.color,
+      fillOpacity: z.opacity,
+      map,
+    });
+
+    // Zone label
+    const c = z.coords.reduce((a,[lat,lng]) => ({lat:a.lat+lat/z.coords.length, lng:a.lng+lng/z.coords.length}), {lat:0,lng:0});
+    new google.maps.Marker({
+      position: c, map,
+      label: { text:z.name, color:z.color, fontSize:'11px', fontWeight:'700', fontFamily:'Sora,sans-serif' },
+      icon: { path:google.maps.SymbolPath.CIRCLE, scale:0 },
+    });
+  });
+
+  // Location markers
+  LOCATIONS.forEach(loc => {
+    const color = CAT_COLORS[loc.category] || '#4f7cff';
+    const marker = new google.maps.Marker({
+      position: { lat:loc.lat, lng:loc.lng },
+      map,
+      title: loc.name,
+      icon: buildMarkerIcon(loc.emoji, color),
+    });
+    marker.addListener('click', () => openDetail(loc));
+    markers[loc.id] = marker;
+  });
+
+  renderChips();
+  renderList();
+};
+
+function buildMarkerIcon(emoji, color) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="54" viewBox="0 0 44 54">
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="${color}" flood-opacity="0.45"/></filter>
+    <path d="M22 2C13.16 2 6 9.16 6 18c0 11 16 34 16 34S38 29 38 18C38 9.16 30.84 2 22 2z" fill="${color}" filter="url(#sh)"/>
+    <circle cx="22" cy="18" r="10" fill="rgba(255,255,255,0.2)"/>
+    <text x="22" y="23" font-size="13" text-anchor="middle">${emoji}</text>
+  </svg>`;
+  return {
+    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(44, 54),
+    anchor: new google.maps.Point(22, 54),
+  };
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function renderChips() {
+  const cats = [...new Set(LOCATIONS.map(l => l.category))];
+  const el = document.getElementById('chips');
+  el.innerHTML = cats.map(cat => {
+    const color = CAT_COLORS[cat] || '#4f7cff';
+    const on = activeFilters.has(cat);
+    return `<div class="chip${on?' on':''}" style="--c:${color}" data-cat="${cat}">
+      <div class="chip-dot"></div>${cat}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    toggleFilter(c.dataset.cat);
+  }));
+}
+
+function toggleFilter(cat) {
+  activeFilters.has(cat) ? activeFilters.delete(cat) : activeFilters.add(cat);
+  renderChips();
+  renderList();
+  updateMarkers();
+  tg?.HapticFeedback.selectionChanged();
+}
+
+// ── FILTER / SEARCH ───────────────────────────────────────────────────────────
+function getFiltered() {
+  return LOCATIONS.filter(loc => {
+    const matchCat = activeFilters.size === 0 || activeFilters.has(loc.category);
+    const q = searchQuery.toLowerCase();
+    const matchQ = !q
+      || loc.name.toLowerCase().includes(q)
+      || loc.category.toLowerCase().includes(q)
+      || (loc.address||'').toLowerCase().includes(q)
+      || (loc.zone||'').toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+}
+
+// ── LIST ──────────────────────────────────────────────────────────────────────
+function renderList() {
+  const filtered = getFiltered();
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  document.getElementById('countLabel').textContent = filtered.length + ' location' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) { list.innerHTML=''; empty.classList.add('show'); return; }
+  empty.classList.remove('show');
+
+  list.innerHTML = filtered.map(loc => {
+    const color = CAT_COLORS[loc.category] || '#4f7cff';
+    return `<div class="loc-item" data-id="${loc.id}">
+      <div class="loc-icon" style="background:${color}22">${loc.emoji}</div>
+      <div class="loc-body">
+        <div class="loc-name">${loc.name}</div>
+        <div class="loc-meta">${loc.zone ? loc.zone+' · ':''} ${loc.address}</div>
+      </div>
+      <span class="loc-badge" style="background:${color}22;color:${color}">${loc.category}</span>
+      <svg class="loc-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.loc-item').forEach(el =>
+    el.addEventListener('click', () => {
+      const loc = LOCATIONS.find(l => l.id == el.dataset.id);
+      if (loc) openDetail(loc);
+    })
+  );
+}
+
+function updateMarkers() {
+  const ids = new Set(getFiltered().map(l => l.id));
+  LOCATIONS.forEach(l => markers[l.id]?.setVisible(ids.has(l.id)));
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────────
+function openDetail(loc) {
+  const color = CAT_COLORS[loc.category] || '#4f7cff';
+
+  document.getElementById('detailName').textContent = loc.name;
+  document.getElementById('detailAddr').textContent = loc.address;
+  document.getElementById('detailZone').textContent = loc.zone || '';
+
+  const badge = document.getElementById('detailBadge');
+  badge.textContent = loc.category;
+  badge.style.cssText = `background:${color}22;color:${color}`;
+
+  const googleRow = document.getElementById('detailGoogleRow');
+  const googleTxt = document.getElementById('detailGoogle');
+  if (loc.google) {
+    googleRow.style.display = 'flex';
+    googleTxt.textContent = 'Also known as: ' + loc.google;
+  } else {
+    googleRow.style.display = 'none';
+  }
+
+  document.getElementById('directionsBtn').onclick = () => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+    tg ? tg.openLink(url) : window.open(url, '_blank');
+  };
+
+  document.getElementById('shareBtn').onclick = () => {
+    const text = `📍 ${loc.name}\n${loc.address}`;
+    if (tg) { navigator.clipboard?.writeText(text); showToast('Link copied!'); }
+    else if (navigator.share) navigator.share({ title: loc.name, text });
+    else { navigator.clipboard?.writeText(text); showToast('Copied!'); }
+  };
+
+  document.getElementById('detail').classList.add('open');
+  tg?.HapticFeedback.impactOccurred('light');
+
+  // Pan main map
+  map?.panTo({ lat: loc.lat, lng: loc.lng });
+
+  // Mini map in detail
+  setTimeout(() => {
+    const pos = { lat: loc.lat, lng: loc.lng };
+    if (!detailMapInst) {
+      detailMapInst = new google.maps.Map(document.getElementById('detail-map'), {
+        center: pos, zoom: 15,
+        styles: isDark ? DARK_STYLE : [],
+        disableDefaultUI: true,
+        gestureHandling: 'none',
+        clickableIcons: false,
+      });
+      detailMarker = new google.maps.Marker({ position: pos, map: detailMapInst });
+    } else {
+      detailMapInst.setCenter(pos);
+      detailMarker.setPosition(pos);
+    }
+  }, 80);
+}
+
+document.getElementById('detailBack').addEventListener('click', () => {
+  document.getElementById('detail').classList.remove('open');
+  tg?.HapticFeedback.impactOccurred('light');
+});
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  clearBtn.style.display = searchQuery ? 'block' : 'none';
+  renderList();
+  updateMarkers();
+});
+
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  searchQuery = '';
+  clearBtn.style.display = 'none';
+  renderList();
+  updateMarkers();
+  searchInput.focus();
+});
+
+// ── SHEET TOGGLE ──────────────────────────────────────────────────────────────
+let sheetExpanded = false;
+document.getElementById('handleRow').addEventListener('click', () => {
+  sheetExpanded = !sheetExpanded;
+  document.getElementById('sheet').classList.toggle('tall', sheetExpanded);
+});
+
+// ── FAB ───────────────────────────────────────────────────────────────────────
+document.getElementById('fab').addEventListener('click', () => {
+  map?.panTo({ lat: 30.052, lng: 31.360 });
+  map?.setZoom(13);
+  tg?.HapticFeedback.impactOccurred('light');
+});
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDb5ZPi3aVYFSVn4gM4g4Cg3SOqB-3Whuw&callback=initMap">
+</script>
+</body>
+</html>
